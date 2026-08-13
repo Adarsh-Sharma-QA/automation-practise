@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where pandoc *)",
+      "Bash(where wkhtmltopdf *)",
+      "Bash(where python *)",
+      "Bash(where node *)",
+      "Bash(where msedge *)",
+      "Read(//c/Program Files \\\\\\(x86\\\\\\)/Microsoft/Edge/Application/**)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Bash(python -m pip show markdown)",
+      "Bash(python -m pip show weasyprint)",
+      "Bash(python -c \"import markdown; print\\('ok'\\)\")",
+      "Bash(start \"\" \"C:/Users/sharm/AppData/Local/Temp/claude/c--Users-sharm-Downloads-AUtomation-Practise/c9f1cf08-6a4b-44f8-8f57-2674e17b0e82/scratchpad/WebDriver-Methods-Reference.html\")"
+    ]
+  }
+}
