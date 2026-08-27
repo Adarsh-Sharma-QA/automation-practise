@@ -24,8 +24,16 @@ automatically the first time you run the project.
 ```
 AUtomation_Practise/
 ├── pom.xml                                  # Maven build file (dependencies + plugins)
-├── src/main/java/com/practise/automation/
-│   └── SeleniumSyntaxPlayground.java        # the one script - see walkthrough below
+├── docs/
+│   └── WebDriver-Methods-Reference.md       # every driver.* call used here, by category
+├── src/main/java/com/practise/
+│   ├── automation/
+│   │   ├── SeleniumSyntaxPlayground.java    # the main script - see walkthrough below
+│   │   └── DriverSetup.java                 # shared createDriver() + a small smoke script
+│   └── algorithms/
+│       └── MaxWordsInSentence.java          # plain-Java string exercise, no browser
+├── src/test/java/com/practise/automation/
+│   └── SauceDemoCheckoutTest.java           # TestNG end-to-end checkout scenario
 ├── .vscode/
 │   └── launch.json                          # F5 debug config for VS Code
 └── target/                                  # build output (created by Maven)
@@ -38,7 +46,7 @@ AUtomation_Practise/
 |---|---|
 | `org.seleniumhq.selenium:selenium-java` | The core Selenium WebDriver API — everything under `org.openqa.selenium.*` |
 | `io.github.bonigarcia:webdrivermanager` | Detects your local Chrome version and downloads the matching `chromedriver.exe` automatically, so you never manage driver binaries by hand |
-| `org.testng:testng` | Included and ready to use for when you outgrow a plain `main()` method and want `@Test` methods, assertions, and test reports (not used by the current script, which runs as plain Java for simplicity) |
+| `org.testng:testng` | `@Test` methods, lifecycle annotations, and `Assert.*` — used by `SauceDemoCheckoutTest` under `src/test/java`, and run via `mvn test`. The playground script itself deliberately stays a plain `main()` for simplicity. |
 
 Build plugins:
 - **maven-compiler-plugin** — compiles against Java 21.
@@ -75,6 +83,58 @@ options.addArguments("--headless=new");
 - **IntelliJ IDEA**: right-click `SeleniumSyntaxPlayground.java` → *Run
   'SeleniumSyntaxPlayground.main()'*. IntelliJ resolves the Maven classpath
   automatically.
+
+## The other classes in this repo
+
+`mvn exec:java` only runs the playground. These three classes are separate,
+independently runnable entry points:
+
+### `DriverSetup` (`src/main/java/.../automation/DriverSetup.java`)
+
+Holds the shared `public static WebDriver createDriver()` that
+`SauceDemoCheckoutTest` reuses, so driver setup lives in exactly one place.
+Its own `main()` is a smoke test against
+[datatables.net](https://datatables.net/examples/index): it opens the *Zero
+configuration* example, parses the "Showing 1 to N of X entries" label out of
+`#example_info` to assert there are at least 25 records, then clicks the first
+numeric column header twice to sort it descending and asserts the top row's
+Age is 65 or more. Run it to confirm your JDK/Maven/Chrome setup works before
+touching anything else:
+
+```powershell
+mvn exec:java "-Dexec.mainClass=com.practise.automation.DriverSetup"
+```
+
+Its `WebDriverWait` is only 2 seconds — on a slow connection, raise
+`Duration.ofSeconds(2)` rather than assuming the locators are broken.
+
+### `SauceDemoCheckoutTest` (`src/test/java/.../automation/SauceDemoCheckoutTest.java`)
+
+A ~10-step TestNG scenario on [saucedemo.com](https://www.saucedemo.com/):
+log in as `standard_user`, add the Sauce Labs Backpack, assert the cart badge
+reads `1`, fill in checkout details, finish the order, and assert the
+"Thank you for your order!" header. `@BeforeClass` builds the driver via
+`DriverSetup.createDriver()`; `@AfterClass` always quits it. Run it with:
+
+```powershell
+mvn test
+```
+
+One gotcha it already works around: saucedemo's checkout form is a SPA, and
+the postal-code field's value can lag behind the keystrokes, so `Continue`
+silently no-ops. The test waits on
+`d -> "00000".equals(...getAttribute("value"))` before clicking — a useful
+pattern for any React/Vue form that re-renders while you type.
+
+### `MaxWordsInSentence` (`src/main/java/.../algorithms/MaxWordsInSentence.java`)
+
+No browser involved. `maxWords(String)` splits on `[.!?]`, trims each
+fragment, skips empty ones, and returns the largest whitespace-delimited word
+count. Run it with:
+
+```powershell
+mvn exec:java "-Dexec.mainClass=com.practise.algorithms.MaxWordsInSentence"
+```
 
 ## How to debug
 
@@ -187,9 +247,9 @@ projects.
 
 ## Next steps to extend this project
 
-- Convert the `demo*` methods into `@Test` methods in a TestNG class under
-  `src/test/java` (the dependency is already in `pom.xml`) and run them with
-  `mvn test`.
+- Convert the `demo*` methods into `@Test` methods under `src/test/java`,
+  the way `SauceDemoCheckoutTest` already does, so they run under `mvn test`
+  with real assertions instead of console output you have to eyeball.
 - Add a Page Object class per page (`LoginPage`, `DropdownPage`, ...) once
   you're comfortable with the raw API calls shown here.
 - Swap `ChromeOptions` for `FirefoxOptions`/`EdgeOptions` and a different
