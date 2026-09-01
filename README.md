@@ -74,6 +74,33 @@ console output), open the file and uncomment this line inside `createDriver()`:
 options.addArguments("--headless=new");
 ```
 
+#### Heads-up: there are two separate `createDriver()` methods
+
+Headless is **not** a project-wide switch. Two different classes build their
+own driver, and flipping one has no effect on the other:
+
+| Method | Used by | Passes `ChromeOptions` to `ChromeDriver`? |
+|---|---|---|
+| `SeleniumSyntaxPlayground.createDriver()` (private) | `mvn exec:java` | Yes — `new ChromeDriver(options)`, with `--remote-allow-origins=*` already set |
+| `DriverSetup.createDriver()` (public static) | `DriverSetup.main`, and `SauceDemoCheckoutTest` via `@BeforeClass` | **No** — it builds an `options` object but then calls the no-arg `new ChromeDriver()` |
+
+So uncommenting the line above only makes `mvn exec:java` headless. To run
+`mvn test` headless you have to edit `DriverSetup.createDriver()` — and
+adding an argument there alone isn't enough, because its `options` variable
+is currently unused. Pass it through as well:
+
+```java
+ChromeOptions options = new ChromeOptions();
+options.addArguments("--headless=new");
+WebDriver driver = new ChromeDriver(options); // was: new ChromeDriver()
+```
+
+The same applies to any other flag you want in the TestNG run
+(`--window-size=1920,1080`, `--disable-gpu`, a custom user-data dir): if it
+doesn't reach `new ChromeDriver(options)`, Chrome starts with defaults and
+the flag is silently ignored — no error, which makes this an easy hour to
+lose.
+
 ### Running from an IDE
 
 - **VS Code**: open `SeleniumSyntaxPlayground.java`, then either click the
