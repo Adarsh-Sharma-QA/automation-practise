@@ -34,8 +34,7 @@ AUtomation_Practise/
 │       └── MaxWordsInSentence.java          # plain-Java string exercise, no browser
 ├── src/test/java/com/practise/automation/
 │   └── SauceDemoCheckoutTest.java           # TestNG end-to-end checkout scenario
-├── .vscode/
-│   └── launch.json                          # F5 debug config for VS Code
+├── .vscode/                                 # gitignored — create launch.json yourself, see "Running from an IDE"
 └── target/                                  # build output (created by Maven)
     └── screenshots/final-state.png          # written by the script on each run
 ```
@@ -110,6 +109,27 @@ lose.
 - **IntelliJ IDEA**: right-click `SeleniumSyntaxPlayground.java` → *Run
   'SeleniumSyntaxPlayground.main()'*. IntelliJ resolves the Maven classpath
   automatically.
+
+  > **Heads-up:** `.vscode/` is listed in `.gitignore`, so this repo does
+  > **not** actually ship a `launch.json` — pressing F5 on a fresh clone
+  > will fail with "no launch configuration" until you create one. Create
+  > `.vscode/launch.json` yourself with:
+  > ```json
+  > {
+  >   "version": "0.2.0",
+  >   "configurations": [
+  >     {
+  >       "type": "java",
+  >       "name": "Debug SeleniumSyntaxPlayground",
+  >       "request": "launch",
+  >       "mainClass": "com.practise.automation.SeleniumSyntaxPlayground",
+  >       "projectName": "AUtomation_Practise"
+  >     }
+  >   ]
+  > }
+  > ```
+  > It stays untracked (by design, since debug configs are usually
+  > per-machine), so you'll need to redo this after every fresh clone.
 
 ## The other classes in this repo
 
