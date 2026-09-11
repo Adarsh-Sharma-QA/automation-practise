@@ -183,6 +183,22 @@ count. Run it with:
 mvn exec:java "-Dexec.mainClass=com.practise.algorithms.MaxWordsInSentence"
 ```
 
+> **Known limitation: abbreviations split sentences early.** The splitter
+> regex `[.!?]` has no idea that a period can belong to an abbreviation
+> instead of ending a sentence, so any `.` inside a title, initial, or
+> abbreviation (`Mr.`, `Dr.`, `U.S.`, `e.g.`) is treated as a sentence
+> boundary. For example:
+> ```java
+> maxWords("Dr. Smith and Mrs. Jones met at the U.S. embassy for a long meeting today.")
+> ```
+> is really one 15-word sentence, but `maxWords` sees it as five fragments —
+> `"Dr"`, `"Smith and Mrs"`, `"Jones met at the U"`, `"S"`, `"embassy for a long meeting today"`
+> — and returns `6` (the size of the biggest fragment), not `15`. There's no workaround
+> in the current implementation; a correct fix would need an
+> abbreviation-aware tokenizer (e.g. a regex lookahead that only splits on
+> `.` followed by whitespace + a capital letter, or a real NLP sentence
+> splitter) rather than a plain character-class split.
+
 ## How to debug
 
 ### Setting breakpoints
