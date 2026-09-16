@@ -198,6 +198,17 @@ mvn exec:java "-Dexec.mainClass=com.practise.algorithms.MaxWordsInSentence"
 > abbreviation-aware tokenizer (e.g. a regex lookahead that only splits on
 > `.` followed by whitespace + a capital letter, or a real NLP sentence
 > splitter) rather than a plain character-class split.
+>
+> The same regex also mis-splits decimal numbers and version strings, since
+> it can't tell a decimal point from a sentence-ending one:
+> ```java
+> maxWords("Please install version 2.5.1 before running the full test suite tonight.")
+> ```
+> is one 11-word sentence, but the `.` in `2.5.1` splits it into three
+> fragments — `"Please install version 2"` (4 words), `"5"` (1 word), and
+> `"1 before running the full test suite tonight"` (8 words) — so `maxWords`
+> returns `8` instead of `11`. Any input with a decimal number, IP address,
+> or version string (`v1.2.3`, `192.168.1.1`) will undercount the same way.
 
 ## How to debug
 
