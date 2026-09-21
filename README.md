@@ -155,6 +155,20 @@ mvn exec:java "-Dexec.mainClass=com.practise.automation.DriverSetup"
 Its `WebDriverWait` is only 2 seconds — on a slow connection, raise
 `Duration.ofSeconds(2)` rather than assuming the locators are broken.
 
+> **Heads-up: `import org.apache.hc.core5.util.Asserts;` compiles but is
+> dead code.** `DriverSetup.java` imports this class and never references
+> it anywhere in the file. It compiles anyway because `httpclient5` (the
+> package `org.apache.hc.core5` belongs to) is a **transitive** dependency
+> pulled in by `selenium-java` itself — Selenium's `RemoteWebDriver`/grid
+> client uses Apache HttpClient 5 under the hood — even though `pom.xml`
+> never declares it directly (see the Dependencies table above). Two
+> practical takeaways: (1) don't take this import as a hint that the class
+> is meant to be used somewhere in this method — it isn't; and (2) don't
+> rely on `org.apache.hc.core5.*` classes in your own code without adding
+> `httpclient5` as an explicit dependency, since a future Selenium upgrade
+> could change or drop that transitive dependency and silently break the
+> build.
+
 ### `SauceDemoCheckoutTest` (`src/test/java/.../automation/SauceDemoCheckoutTest.java`)
 
 A ~10-step TestNG scenario on [saucedemo.com](https://www.saucedemo.com/):
